@@ -30,11 +30,13 @@ public abstract class Vehicle : MonoBehaviour
     public Vector3 BottomLeft
     {
         set { bottomLeft = value; }
+        get { return bottomLeft; }
     }
 
     public Vector3 TopRight
     {
         set { topRight = value; }
+        get { return topRight; }
     }
 
     /// <summary>
@@ -50,7 +52,7 @@ public abstract class Vehicle : MonoBehaviour
     /// </summary>
     public Vector3 Center
     {
-        get { return position; }
+        get { return transform.position; }
     }
 
     //Start is called once when the object is created
@@ -74,6 +76,9 @@ public abstract class Vehicle : MonoBehaviour
             ApplyFriction(0f);
         }
 
+        //steers to keep the object on the map
+        WallSteer();
+
         //adds acceleration to velocity, standardized to time
         velocity += acceleration * Time.deltaTime;
         if(velocity.magnitude > maxSpeed)
@@ -81,9 +86,6 @@ public abstract class Vehicle : MonoBehaviour
             velocity.Normalize();
             velocity *= maxSpeed;
         }
-
-        //applies the bounce to keep the object on screen
-        Bounce();
 
         //adds velocity to position, standardized to time
         position += velocity * Time.deltaTime;
@@ -95,7 +97,10 @@ public abstract class Vehicle : MonoBehaviour
         transform.position = position;
 
         //fixes rotation of vehicle
-        transform.rotation = Quaternion.LookRotation(velocity);
+        if(velocity != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(velocity);
+        }
     }
 
     //methods
@@ -199,4 +204,27 @@ public abstract class Vehicle : MonoBehaviour
     /// </summary>
     public abstract void CalcSteeringForces();
 
+    /// <summary>
+    /// applies forces to prevent the object from leaving the map
+    /// </summary>
+    public void WallSteer()
+    {
+        //checks if the object is close to a wall, and if close enough, applies a force towards the center of the map
+        if(position.x < bottomLeft.x + 5)
+        {
+            ApplyForce(new Vector3(Mathf.Pow(5-(position.x-bottomLeft.x),2), 0, 0));
+        }
+        if(position.z < bottomLeft.z + 5)
+        {
+            ApplyForce(new Vector3(0, 0, Mathf.Pow(5-(position.z - bottomLeft.z), 2)));
+        }
+        if(position.x > topRight.x - 5)
+        {
+            ApplyForce(new Vector3(-Mathf.Pow(5-(position.x - topRight.x), 2), 0, 0));
+        }
+        if(position.z > topRight.z - 5)
+        {
+            ApplyForce(new Vector3(0, 0, -Mathf.Pow(5-(position.z - topRight.z), 2)));
+        }
+    }
 }

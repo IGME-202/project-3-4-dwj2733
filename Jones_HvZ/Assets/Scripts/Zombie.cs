@@ -75,7 +75,7 @@ public class Zombie : Vehicle
         //draws the forward line
         GL.Begin(GL.LINES);
         GL.Vertex(position);
-        GL.Vertex(position + velocity.normalized * 2f);
+        GL.Vertex(position + transform.forward * 2f);
         GL.End();
 
         //sets the side material
@@ -84,10 +84,10 @@ public class Zombie : Vehicle
         //draws the side line
         GL.Begin(GL.LINES);
         GL.Vertex(position);
-        GL.Vertex(position + Quaternion.Euler(0, 90, 0) * velocity.normalized * 2f);
+        GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 2f);
         GL.End();
 
-        if (manager.Humans.Count > 0)
+        if (manager.Humans.Count > 0 && closestHuman != null)
         {
             //sets the target material
             manager.targetMat.SetPass(0);

@@ -421,14 +421,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   floor: {fileID: 559774175}
   zombieCount: 2
-  humanCount: 20
+  humanCount: 25
   zombiePrefab: {fileID: 290826601949162788, guid: 7d5a2f024f04f44469f5132e506e06bb,
     type: 3}
   humanPrefab: {fileID: 1858295651049017716, guid: 7a916c8793ab3094aadba663ae20ccc0,
     type: 3}
-  forwardMat: {fileID: 2100000, guid: 68344c1a9c822754294a6823ba829ced, type: 2}
-  sideMat: {fileID: 2100000, guid: 83b2585d1a01bf548805e04ba3e50cd7, type: 2}
-  targetMat: {fileID: 2100000, guid: a0515b8514384fd42bc866fbdfed35d8, type: 2}
+  forwardMat: {fileID: 2100000, guid: 78d230b13cc6fe045865a59dc79c6e6a, type: 2}
+  sideMat: {fileID: 2100000, guid: cf7be41ae62558442a4feaf53eaad060, type: 2}
+  targetMat: {fileID: 2100000, guid: 3e0b953cc3056ff4f8620c0deefb269c, type: 2}
 --- !u!4 &1187382184
 Transform:
   m_ObjectHideFlags: 0

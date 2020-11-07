@@ -87,7 +87,7 @@ public class SceneManager : MonoBehaviour
     void Update()
     {
         //checks for collisions between humans and zombies and converts humans to zombies
-        if(zombies.Count>0 && humans.Count > 0)
+        if (zombies.Count>0 && humans.Count > 0)
         {
             for (int i = 0; i < zombies.Count; i++)
             {

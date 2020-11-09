@@ -53,6 +53,16 @@ public class Human : Vehicle
                 sampleDistance = Mathf.Pow(this.transform.position.x - manager.Zombies[i].transform.position.x, 2f)
                                  + Mathf.Pow(this.transform.position.z - manager.Zombies[i].transform.position.z, 2f);
 
+
+
+                //only flees the zombie if the zombie is close enough
+                if (Mathf.Pow(manager.Zombies[i].transform.position.x - this.transform.position.x, 2f) +
+                   Mathf.Pow(manager.Zombies[i].transform.position.z - this.transform.position.z, 2f) <=
+                   100)
+                {
+                    Flee(manager.Zombies[i]);
+                }
+
                 //adjust variables
                 if (sampleDistance < minDistance)
                 {
@@ -60,16 +70,8 @@ public class Human : Vehicle
                     closestZombie = manager.Zombies[i];
                 }
             }
-
-            //only flees the zombie if the zombie is close enough
-            if (Mathf.Pow(closestZombie.transform.position.x - this.transform.position.x, 2) +
-               Mathf.Pow(closestZombie.transform.position.z - this.transform.position.z, 2) <=
-               100)
-            {
-                Flee(closestZombie);
-            }
             //if the closest zombie isnt close enough, finds a random point in the park to walk to
-            else
+            if(minDistance > 100)
             {
                 //if close enough to the target point or a target point doesnt exist, generates a new target point
                 if (Mathf.Pow(targetPoint.x - transform.position.x, 2) + Mathf.Pow(targetPoint.z - transform.position.z, 2) <= 1)
@@ -107,22 +109,26 @@ public class Human : Vehicle
     /// </summary>
     void OnRenderObject()
     {
-        //sets the forward material
-        manager.forwardMat.SetPass(0);
+        //only draws debug lines if in debug mode
+        if (manager.debugMode)
+        {
+            //sets the forward material
+            manager.forwardMat.SetPass(0);
 
-        //draws the forward line
-        GL.Begin(GL.LINES);
-        GL.Vertex(position);
-        GL.Vertex(position + transform.forward * 1.5f);
-        GL.End();
+            //draws the forward line
+            GL.Begin(GL.LINES);
+            GL.Vertex(position);
+            GL.Vertex(position + transform.forward * 1.5f);
+            GL.End();
 
-        //sets the side material
-        manager.sideMat.SetPass(0);
+            //sets the side material
+            manager.sideMat.SetPass(0);
 
-        //draws the side line
-        GL.Begin(GL.LINES);
-        GL.Vertex(position);
-        GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 1.5f);
-        GL.End();
+            //draws the side line
+            GL.Begin(GL.LINES);
+            GL.Vertex(position);
+            GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 1.5f);
+            GL.End();
+        }
     }
 }

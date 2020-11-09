@@ -77,7 +77,7 @@ public abstract class Vehicle : MonoBehaviour
         }
 
         //steers to keep the object on the map
-        WallSteer();
+        StayInBounds();
 
         //adds acceleration to velocity, standardized to time
         velocity += acceleration * Time.deltaTime;
@@ -207,24 +207,24 @@ public abstract class Vehicle : MonoBehaviour
     /// <summary>
     /// applies forces to prevent the object from leaving the map
     /// </summary>
-    public void WallSteer()
+    public void StayInBounds()
     {
         //checks if the object is close to a wall, and if close enough, applies a force towards the center of the map
         if(position.x < bottomLeft.x + 5)
         {
-            ApplyForce(new Vector3(Mathf.Pow(5-(position.x-bottomLeft.x),2), 0, 0));
+            ApplyForce(new Vector3(Mathf.Pow(5-(position.x-bottomLeft.x), 2f), 0, 0) * (1 + acceleration.magnitude/10));
         }
         if(position.z < bottomLeft.z + 5)
         {
-            ApplyForce(new Vector3(0, 0, Mathf.Pow(5-(position.z - bottomLeft.z), 2)));
+            ApplyForce(new Vector3(0, 0, Mathf.Pow(5-(position.z - bottomLeft.z), 2f)) * (1 + acceleration.magnitude / 10));
         }
         if(position.x > topRight.x - 5)
         {
-            ApplyForce(new Vector3(-Mathf.Pow(5-(position.x - topRight.x), 2), 0, 0));
+            ApplyForce(new Vector3(-Mathf.Pow(5-(topRight.x - position.x), 2f), 0, 0) * (1 + acceleration.magnitude / 10));
         }
         if(position.z > topRight.z - 5)
         {
-            ApplyForce(new Vector3(0, 0, -Mathf.Pow(5-(position.z - topRight.z), 2)));
+            ApplyForce(new Vector3(0, 0, -Mathf.Pow(5-(topRight.z - position.z), 2f)) * (1 + acceleration.magnitude / 10));
         }
     }
 }

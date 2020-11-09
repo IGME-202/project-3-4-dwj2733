@@ -69,34 +69,38 @@ public class Zombie : Vehicle
     /// </summary>
     void OnRenderObject()
     {
-        //sets the forward material
-        manager.forwardMat.SetPass(0);
-
-        //draws the forward line
-        GL.Begin(GL.LINES);
-        GL.Vertex(position);
-        GL.Vertex(position + transform.forward * 2f);
-        GL.End();
-
-        //sets the side material
-        manager.sideMat.SetPass(0);
-
-        //draws the side line
-        GL.Begin(GL.LINES);
-        GL.Vertex(position);
-        GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 2f);
-        GL.End();
-
-        if (manager.Humans.Count > 0 && closestHuman != null)
+        //only draws debug lines if in debug mode
+        if (manager.debugMode)
         {
-            //sets the target material
-            manager.targetMat.SetPass(0);
+            //sets the forward material
+            manager.forwardMat.SetPass(0);
 
-            //draws the target line
+            //draws the forward line
             GL.Begin(GL.LINES);
             GL.Vertex(position);
-            GL.Vertex(closestHuman.transform.position);
+            GL.Vertex(position + transform.forward * 2f);
             GL.End();
+
+            //sets the side material
+            manager.sideMat.SetPass(0);
+
+            //draws the side line
+            GL.Begin(GL.LINES);
+            GL.Vertex(position);
+            GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 2f);
+            GL.End();
+
+            if (manager.Humans.Count > 0 && closestHuman != null)
+            {
+                //sets the target material
+                manager.targetMat.SetPass(0);
+
+                //draws the target line
+                GL.Begin(GL.LINES);
+                GL.Vertex(position);
+                GL.Vertex(closestHuman.transform.position);
+                GL.End();
+            }
         }
     }
 }

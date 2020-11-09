@@ -24,6 +24,7 @@ public class SceneManager : MonoBehaviour
     public Material forwardMat;
     public Material sideMat;
     public Material targetMat;
+    public bool debugMode;
 
     //properties
     public List<GameObject> Zombies
@@ -39,6 +40,9 @@ public class SceneManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //initializes debug mode
+        debugMode = false;
+
         //creates lists of zombies and humans, and populates
         zombieObjects = new List<GameObject>();
         humanObjects = new List<GameObject>();
@@ -86,6 +90,12 @@ public class SceneManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //toggles debug mode
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            debugMode = !debugMode;
+        }
+
         //checks for collisions between humans and zombies and converts humans to zombies
         if (zombies.Count>0 && humans.Count > 0)
         {
@@ -124,5 +134,14 @@ public class SceneManager : MonoBehaviour
     bool Colliding(Vehicle zombie, Vehicle human)
     {
         return (Mathf.Pow(zombie.Center.x - human.Center.x, 2) + Mathf.Pow(zombie.Center.z - human.Center.z, 2) < Mathf.Pow(zombie.Radius + human.Radius, 2));
+    }
+
+
+    /// <summary>
+    /// Displays the input commands for toggling debug lines
+    /// </summary>
+    void OnGUI()
+    {
+        GUI.Box(new Rect(5, 5, 200, 25), "Press D to toggle debug lines");
     }
 }

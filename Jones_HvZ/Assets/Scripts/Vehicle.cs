@@ -15,6 +15,7 @@ public abstract class Vehicle : MonoBehaviour
     protected Vector3 acceleration;
     public bool frictionOn;
     protected float maxSpeed;
+    public SceneManager manager;
 
     //camera variables
     private Vector3 bottomLeft;
@@ -68,7 +69,10 @@ public abstract class Vehicle : MonoBehaviour
     protected void Update()
     {
         //Calls steering force method
-        CalcSteeringForces();
+        ApplyForce(CalcSteeringForces());
+
+        //Calls Reynolds Obstacle Avoidance method
+        ApplyForce(ObstacleAvoid());
 
         //applies friction if it is on
         if (frictionOn)
@@ -77,7 +81,7 @@ public abstract class Vehicle : MonoBehaviour
         }
 
         //steers to keep the object on the map
-        StayInBounds();
+        ApplyForce(StayInBounds());
 
         //adds acceleration to velocity, standardized to time
         velocity += acceleration * Time.deltaTime;
@@ -160,71 +164,113 @@ public abstract class Vehicle : MonoBehaviour
     /// Seeks in the direction of a given vector
     /// </summary>
     /// <param name="direction">The vector between the current object and the target object</param>
-    public void Seek(Vector3 direction)
+    public Vector3 Seek(Vector3 direction)
     {
         Vector3 desiredVelocity = Vector3.Normalize(direction) * maxSpeed;
-        ApplyForce(desiredVelocity - velocity);
+        return desiredVelocity - velocity;
     }
 
     /// <summary>
     /// Seeks in the direction of a target by determining the direction vector, then calling seek in that direction.
     /// </summary>
     /// <param name="target">The game object to seek</param>
-    public void Seek(GameObject target)
+    public Vector3 Seek(GameObject target)
     {
         Vector3 direction = target.transform.position - this.transform.position;
         direction.y = 0;
-        Seek(direction);
+        return Seek(direction);
     }
 
     /// <summary>
     /// Flees in the opposite direction of a given vector
     /// </summary>
     /// <param name="direction">The vector between the current object and the target object</param>
-    public void Flee(Vector3 direction)
+    public Vector3 Flee(Vector3 direction)
     {
         Vector3 desiredVelocity = Vector3.Normalize(direction) * maxSpeed;
         desiredVelocity *= -1;
-        ApplyForce(desiredVelocity - velocity);
+        return desiredVelocity - velocity;
     }
 
     /// <summary>
     /// Flees in the opposite direction of a target by determining the direction vector, then calling seek in that direction.
     /// </summary>
     /// <param name="target">The game object to seek</param>
-    public void Flee(GameObject target)
+    public Vector3 Flee(GameObject target)
     {
         Vector3 direction = target.transform.position - this.transform.position;
         direction.y = 0;
-        Flee(direction);
+        return Flee(direction);
     }
 
     /// <summary>
     /// Abstract method to be implemented in the other classes
     /// </summary>
-    public abstract void CalcSteeringForces();
+    public abstract Vector3 CalcSteeringForces();
 
     /// <summary>
     /// applies forces to prevent the object from leaving the map
     /// </summary>
-    public void StayInBounds()
+    public Vector3 StayInBounds()
     {
+        Vector3 inbounds = new Vector3(0, 0, 0);
+
         //checks if the object is close to a wall, and if close enough, applies a force towards the center of the map
         if(position.x < bottomLeft.x + 5)
         {
-            ApplyForce(new Vector3(Mathf.Pow(5-(position.x-bottomLeft.x), 2f), 0, 0) * (1 + acceleration.magnitude/10));
+            inbounds += (new Vector3(Mathf.Pow(5-(position.x-bottomLeft.x), 2f), 0, 0) * (1 + acceleration.magnitude/10));
         }
         if(position.z < bottomLeft.z + 5)
         {
-            ApplyForce(new Vector3(0, 0, Mathf.Pow(5-(position.z - bottomLeft.z), 2f)) * (1 + acceleration.magnitude / 10));
+            inbounds += (new Vector3(0, 0, Mathf.Pow(5-(position.z - bottomLeft.z), 2f)) * (1 + acceleration.magnitude / 10));
         }
         if(position.x > topRight.x - 5)
         {
-            ApplyForce(new Vector3(-Mathf.Pow(5-(topRight.x - position.x), 2f), 0, 0) * (1 + acceleration.magnitude / 10));
+            inbounds += (new Vector3(-Mathf.Pow(5-(topRight.x - position.x), 2f), 0, 0) * (1 + acceleration.magnitude / 10));
         }
         if(position.z > topRight.z - 5)
         {
-            ApplyForce(new Vector3(0, 0, -Mathf.Pow(5-(topRight.z - position.z), 2f)) * (1 + acceleration.magnitude / 10));
+            inbounds += (new Vector3(0, 0, -Mathf.Pow(5-(topRight.z - position.z), 2f)) * (1 + acceleration.magnitude / 10));
         }
+
+        return inbounds;
+    }
+
+    /// <summary>
+    /// Method to avoid obstacles using reynolds obstacle avoidance 
+    /// </summary>
+    /// <returns>a steering vector that steers the vehicle away from obstacles</returns>
+    public Vector3 ObstacleAvoid()
+    {
+        Vector3 forward = this.transform.forward;
+        Vector3 right = Quaternion.Euler(0,90,0) * this.transform.forward;
+        Vector3 obstacle;
+        Vector3 steering = new Vector3(0, 0, 0);
+        float forwardDot;
+        float rightDot;
+        float strength;
+
+        //loops through obstacles
+        for(int i = 0; i<manager.Obstacles.Count; i++)
+        {
+            //sets variables
+            obstacle = manager.Obstacles[i].Center - this.Center;
+            forwardDot = forward.x * obstacle.x + forward.z * obstacle.z;
+            rightDot = right.x * obstacle.x + right.z * obstacle.z;
+
+            //ignores obstacles that are behind or too far away
+            if (forwardDot > 0 && forwardDot < maxSpeed/mass)
+            {
+                //ignores obstacles that are not in the objects path
+                if(Mathf.Abs(rightDot) < this.Radius + manager.Obstacles[i].Radius)
+                {
+                    strength = (maxSpeed/mass/2 + 1 + this.Radius + manager.Obstacles[i].Radius) / (maxSpeed/mass + 1);
+                    steering += (this.transform.rotation * new Vector3(rightDot * -1, 0, 0)).normalized * maxSpeed * strength; 
+                }
+            }
+
+        }
+
+        return steering;
     }
 }

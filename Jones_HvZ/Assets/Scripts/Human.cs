@@ -9,7 +9,6 @@ using UnityEngine;
 public class Human : Vehicle
 {
     //variables
-    public SceneManager manager;
     private GameObject closestZombie;
     private Vector3 targetPoint;
 
@@ -37,8 +36,10 @@ public class Human : Vehicle
     /// <summary>
     /// Flees the zombie and seeks the psg. Additionally flees the closest human to avoid clustering
     /// </summary>
-    public override void CalcSteeringForces()
+    public override Vector3 CalcSteeringForces()
     {
+        Vector3 steering = new Vector3(0, 0, 0);
+
         if(manager.Zombies.Count > 0)
         {
             //variables to track the closest zombie
@@ -60,7 +61,7 @@ public class Human : Vehicle
                    Mathf.Pow(manager.Zombies[i].transform.position.z - this.transform.position.z, 2f) <=
                    100)
                 {
-                    Flee(manager.Zombies[i]);
+                    steering += Flee(manager.Zombies[i]);
                 }
 
                 //adjust variables
@@ -78,7 +79,7 @@ public class Human : Vehicle
                 {
                     targetPoint = new Vector3(Random.Range(BottomLeft.x + 5, TopRight.x - 5), .5f, Random.Range(BottomLeft.z + 5, TopRight.z - 5));
                 }
-                Seek(targetPoint - position);
+                steering += Seek(targetPoint - position);
             }
 
             //adjusts speed
@@ -98,10 +99,12 @@ public class Human : Vehicle
             //if close enough to the target point or a target point doesnt exist, generates a new target point
             if (Mathf.Pow(targetPoint.x - transform.position.x, 2) + Mathf.Pow(targetPoint.z - transform.position.z, 2) <= 1)
             {
-                targetPoint = new Vector3(Random.Range(BottomLeft.x, TopRight.x), .5f, Random.Range(BottomLeft.z, TopRight.z));
+                targetPoint = new Vector3(Random.Range(BottomLeft.x + 5, TopRight.x - 5), .5f, Random.Range(BottomLeft.z + 5, TopRight.z - 5));
             }
-            Seek(targetPoint - position);
+            steering += Seek(targetPoint - position);
         }
+
+        return steering;
     }
 
     /// <summary>
@@ -129,6 +132,7 @@ public class Human : Vehicle
             GL.Vertex(position);
             GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 1.5f);
             GL.End();
+
         }
     }
 }

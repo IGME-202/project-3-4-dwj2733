@@ -14,13 +14,18 @@ public class SceneManager : MonoBehaviour
     private List<GameObject> zombieObjects;
     private List<Human> humans;
     private List<GameObject> humanObjects;
+    private List<Obstacle> obstacles;
+    private List<GameObject> obstacleObjects;
     public GameObject floor;
     public int zombieCount;
     public int humanCount;
+    public int obstacleCount;
     public GameObject zombiePrefab;
     public GameObject humanPrefab;
+    public GameObject obstaclePrefab;
     private GameObject zombie;
     private GameObject human;
+    private GameObject obstacle;
     public Material forwardMat;
     public Material sideMat;
     public Material targetMat;
@@ -37,15 +42,21 @@ public class SceneManager : MonoBehaviour
         get { return humanObjects; }
     }
 
+    public List<Obstacle> Obstacles
+    {
+        get { return obstacles; }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         //initializes debug mode
         debugMode = false;
 
-        //creates lists of zombies and humans, and populates
+        //creates lists of zombies, obstacles and humans, and populates
         zombieObjects = new List<GameObject>();
         humanObjects = new List<GameObject>();
+        obstacleObjects = new List<GameObject>();
         for(int i = 0; i<zombieCount; i++)
         {
             zombie = Instantiate(zombiePrefab, new Vector3(Random.Range(floor.transform.localScale.x * -5, floor.transform.localScale.x * 5), 1f, Random.Range(floor.transform.localScale.z * -5, floor.transform.localScale.z * 5)), Quaternion.identity);
@@ -55,6 +66,11 @@ public class SceneManager : MonoBehaviour
         {
             human = Instantiate(humanPrefab, new Vector3(Random.Range(floor.transform.localScale.x * -5, floor.transform.localScale.x * 5), .5f, Random.Range(floor.transform.localScale.z * -5, floor.transform.localScale.z * 5)), Quaternion.identity);
             humanObjects.Add(human);
+        }
+        for(int i = 0; i<obstacleCount; i++)
+        {
+            obstacle = Instantiate(obstaclePrefab, new Vector3(Random.Range(floor.transform.localScale.x * -5, floor.transform.localScale.x * 5), .5f, Random.Range(floor.transform.localScale.z * -5, floor.transform.localScale.z * 5)), Quaternion.identity);
+            obstacleObjects.Add(obstacle);
         }
 
 
@@ -68,6 +84,11 @@ public class SceneManager : MonoBehaviour
         for(int i = 0; i<humanObjects.Count; i++)
         {
             humans.Add(humanObjects[i].GetComponent<Human>());
+        }
+        obstacles = new List<Obstacle>();
+        for(int i = 0; i<obstacleObjects.Count; i++)
+        {
+            obstacles.Add(obstacleObjects[i].GetComponent<Obstacle>());
         }
 
         //assigns psg and zombie to humans

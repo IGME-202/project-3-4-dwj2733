@@ -9,7 +9,6 @@ using UnityEngine;
 public class Zombie : Vehicle
 {
     //variables
-    public SceneManager manager;
     private GameObject closestHuman;
     //base methods
     void Start()
@@ -29,8 +28,10 @@ public class Zombie : Vehicle
     /// <summary>
     /// finds the closest human and seeks them
     /// </summary>
-    public override void CalcSteeringForces()
+    public override Vector3 CalcSteeringForces()
     {
+        Vector3 steering = new Vector3(0, 0, 0);
+
         if(manager.Humans.Count > 0)
         {
             //variables to track the closest human
@@ -54,13 +55,15 @@ public class Zombie : Vehicle
             }
 
             //seeks the closest human
-            Seek(closestHuman);
+            steering += Seek(closestHuman);
 
         }
         else
         {
             ApplyFriction(.9f);
         }
+
+        return steering;
 
     }
 

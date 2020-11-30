@@ -20,7 +20,8 @@ The above and beyond I have added in this project are the adding and removing of
 
 ## Known Issues
 
-There are no known issues in the program.
+Under heavy load, sometimes the first person view will allow the zombie or human's head flicker rapidly.
+Occasionally, if multiple zombies are spawned in (either by a human dying or pressing z) at the same time, the program may crash.
 
 ## Requirements not completed
 

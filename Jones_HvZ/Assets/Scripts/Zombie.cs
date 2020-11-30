@@ -10,11 +10,14 @@ public class Zombie : Vehicle
 {
     //variables
     private GameObject closestHuman;
+    
     //base methods
     void Start()
     {
+        //sets mass and speed accordingly
         mass = 2f;
         maxSpeed = 6f;
+
         base.Start();
     }
 
@@ -26,7 +29,7 @@ public class Zombie : Vehicle
     //steering force method
 
     /// <summary>
-    /// finds the closest human and seeks them
+    /// finds the closest human and pursues them
     /// </summary>
     public override Vector3 CalcSteeringForces()
     {
@@ -55,16 +58,38 @@ public class Zombie : Vehicle
             }
 
             //seeks the closest human
-            steering += Seek(closestHuman);
+            steering += Pursue(closestHuman.GetComponent<Human>());
 
         }
         else
         {
-            ApplyFriction(.9f);
+            steering += Wander();
         }
 
         return steering;
 
+    }
+
+    /// <summary>
+    /// Method intended to separate this zombie from other zombies
+    /// </summary>
+    /// <returns>A steering force that separates this zombie from others</returns>
+    public override Vector3 Separate()
+    {
+        Vector3 steering = new Vector3(0,0,0);
+        float distance;
+
+        for(int i = 0; i<manager.Zombies.Count; i++)
+        {
+            distance = Mathf.Pow(this.transform.position.x - manager.Zombies[i].transform.position.x, 2f)
+                        + Mathf.Pow(this.transform.position.z - manager.Zombies[i].transform.position.z, 2f);
+            if(distance != 0 && distance <= 8)
+            {
+                steering += Flee(manager.Zombies[i]) / distance;
+            }
+        }
+
+        return steering;
     }
 
     /// <summary>
@@ -73,37 +98,42 @@ public class Zombie : Vehicle
     void OnRenderObject()
     {
         //only draws debug lines if in debug mode
-        if (manager.debugMode)
+        if(manager != null)
         {
-            //sets the forward material
-            manager.forwardMat.SetPass(0);
-
-            //draws the forward line
-            GL.Begin(GL.LINES);
-            GL.Vertex(position);
-            GL.Vertex(position + transform.forward * 2f);
-            GL.End();
-
-            //sets the side material
-            manager.sideMat.SetPass(0);
-
-            //draws the side line
-            GL.Begin(GL.LINES);
-            GL.Vertex(position);
-            GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 2f);
-            GL.End();
-
-            if (manager.Humans.Count > 0 && closestHuman != null)
+            if (manager.debugMode)
             {
-                //sets the target material
-                manager.targetMat.SetPass(0);
+                //sets the forward material
+                manager.forwardMat.SetPass(0);
 
-                //draws the target line
+                //draws the forward line
                 GL.Begin(GL.LINES);
-                GL.Vertex(position);
-                GL.Vertex(closestHuman.transform.position);
+                GL.Vertex(position + upShift);
+                GL.Vertex(position + transform.forward * 2f + upShift);
                 GL.End();
+
+                //sets the side material
+                manager.sideMat.SetPass(0);
+
+                //draws the side line
+                GL.Begin(GL.LINES);
+                GL.Vertex(position + upShift);
+                GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 2f + upShift);
+                GL.End();
+
+                if (manager.Humans.Count > 0 && closestHuman != null)
+                {
+                    //sets the target material
+                    manager.targetMat.SetPass(0);
+
+                    //draws the target line
+                    GL.Begin(GL.LINES);
+                    GL.Vertex(position + upShift);
+                    GL.Vertex(closestHuman.GetComponent<Human>().FuturePosition + upShift);
+                    GL.End();
+                }
             }
+
         }
+        
     }
 }

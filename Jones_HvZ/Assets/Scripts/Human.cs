@@ -10,7 +10,6 @@ public class Human : Vehicle
 {
     //variables
     private GameObject closestZombie;
-    private Vector3 targetPoint;
 
     //base methods
     void Start()
@@ -19,11 +18,7 @@ public class Human : Vehicle
         mass = 1f;
         maxSpeed = 8f;
 
-        //calls base start
         base.Start();
-
-        //sets an initial target point
-        targetPoint = new Vector3(Random.Range(BottomLeft.x + 5, TopRight.x - 5), .5f, Random.Range(BottomLeft.z + 5, TopRight.z - 5));
     }
 
     void Update()
@@ -34,7 +29,7 @@ public class Human : Vehicle
     //steering force method
 
     /// <summary>
-    /// Flees the zombie and seeks the psg. Additionally flees the closest human to avoid clustering
+    /// Evades the closest zombie if one is in range, otherwise wanders
     /// </summary>
     public override Vector3 CalcSteeringForces()
     {
@@ -61,7 +56,7 @@ public class Human : Vehicle
                    Mathf.Pow(manager.Zombies[i].transform.position.z - this.transform.position.z, 2f) <=
                    100)
                 {
-                    steering += Flee(manager.Zombies[i]);
+                    steering += Evade(manager.Zombies[i].GetComponent<Zombie>());
                 }
 
                 //adjust variables
@@ -74,34 +69,34 @@ public class Human : Vehicle
             //if the closest zombie isnt close enough, finds a random point in the park to walk to
             if(minDistance > 100)
             {
-                //if close enough to the target point or a target point doesnt exist, generates a new target point
-                if (Mathf.Pow(targetPoint.x - transform.position.x, 2) + Mathf.Pow(targetPoint.z - transform.position.z, 2) <= 1)
-                {
-                    targetPoint = new Vector3(Random.Range(BottomLeft.x + 5, TopRight.x - 5), .5f, Random.Range(BottomLeft.z + 5, TopRight.z - 5));
-                }
-                steering += Seek(targetPoint - position);
-            }
-
-            //adjusts speed
-            maxSpeed = 1000 / (Mathf.Pow(closestZombie.transform.position.x - this.transform.position.x, 2) +
-               Mathf.Pow(closestZombie.transform.position.z - this.transform.position.z, 2));
-            if (maxSpeed > 8f)
-            {
-                maxSpeed = 8f;
-            }
-            if (maxSpeed < 4f)
-            {
-                maxSpeed = 4f;
+                steering += Wander();
             }
         }
         else
         {
-            //if close enough to the target point or a target point doesnt exist, generates a new target point
-            if (Mathf.Pow(targetPoint.x - transform.position.x, 2) + Mathf.Pow(targetPoint.z - transform.position.z, 2) <= 1)
+            steering += Wander();
+        }
+
+        return steering;
+    }
+
+    /// <summary>
+    /// Method intended to separate this human from other humans
+    /// </summary>
+    /// <returns>A steering force that separates this human from others</returns>
+    public override Vector3 Separate()
+    {
+        Vector3 steering = new Vector3(0, 0, 0);
+        float distance;
+
+        for (int i = 0; i < manager.Humans.Count; i++)
+        {
+            distance = Mathf.Pow(this.transform.position.x - manager.Humans[i].transform.position.x, 2f)
+                        + Mathf.Pow(this.transform.position.z - manager.Humans[i].transform.position.z, 2f);
+            if (distance != 0 && distance <= 8)
             {
-                targetPoint = new Vector3(Random.Range(BottomLeft.x + 5, TopRight.x - 5), .5f, Random.Range(BottomLeft.z + 5, TopRight.z - 5));
+                steering += Flee(manager.Humans[i]) / distance;
             }
-            steering += Seek(targetPoint - position);
         }
 
         return steering;
@@ -120,8 +115,8 @@ public class Human : Vehicle
 
             //draws the forward line
             GL.Begin(GL.LINES);
-            GL.Vertex(position);
-            GL.Vertex(position + transform.forward * 1.5f);
+            GL.Vertex(position + upShift);
+            GL.Vertex(position + transform.forward * 1.5f + upShift);
             GL.End();
 
             //sets the side material
@@ -129,10 +124,9 @@ public class Human : Vehicle
 
             //draws the side line
             GL.Begin(GL.LINES);
-            GL.Vertex(position);
-            GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 1.5f);
+            GL.Vertex(position + upShift);
+            GL.Vertex(position + Quaternion.Euler(0, 90, 0) * transform.forward * 1.5f + upShift);
             GL.End();
-
         }
     }
 }

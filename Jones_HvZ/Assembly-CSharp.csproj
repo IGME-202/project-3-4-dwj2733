@@ -63,6 +63,8 @@
     <Compile Include="Assets\Scripts\SceneManager.cs" />
     <Compile Include="Assets\Scripts\Vehicle.cs" />
     <Compile Include="Assets\Scripts\Zombie.cs" />
+    <None Include="Assets\ManNeko_Assets\Adventurer Blake\Read Me.txt" />
+    <None Include="Assets\laxer tree pkg\README.txt" />
     <Reference Include="UnityEngine">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.9f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
